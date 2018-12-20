@@ -7,8 +7,8 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.modules.core.DeviceEventManagerModule.RCTDeviceEventEmitter;
 import com.wei.android.lib.fingerprintidentify.FingerprintIdentify;
-import com.wei.android.lib.fingerprintidentify.base.BaseFingerprint.FingerprintIdentifyExceptionListener;
-import com.wei.android.lib.fingerprintidentify.base.BaseFingerprint.FingerprintIdentifyListener;
+import com.wei.android.lib.fingerprintidentify.base.BaseFingerprint.ExceptionListener;
+import com.wei.android.lib.fingerprintidentify.base.BaseFingerprint.IdentifyListener;
 
 public class ReactNativeFingerprintScannerModule extends ReactContextBaseJavaModule
         implements LifecycleEventListener {
@@ -45,14 +45,16 @@ public class ReactNativeFingerprintScannerModule extends ReactContextBaseJavaMod
             return mFingerprintIdentify;
         }
         mReactContext.addLifecycleEventListener(this);
-        mFingerprintIdentify = new FingerprintIdentify(getCurrentActivity(),
-                new FingerprintIdentifyExceptionListener() {
+        mFingerprintIdentify = new FingerprintIdentify(getCurrentActivity());
+        mFingerprintIdentify.setSupportAndroidL(true);
+        mFingerprintIdentify.setExceptionListener(new ExceptionListener() {
                     @Override
                     public void onCatchException(Throwable exception) {
                         mReactContext.removeLifecycleEventListener(
                                 ReactNativeFingerprintScannerModule.this);
                     }
                 });
+        mFingerprintIdentify.init();
         return mFingerprintIdentify;
     }
 
@@ -77,7 +79,7 @@ public class ReactNativeFingerprintScannerModule extends ReactContextBaseJavaMod
         }
 
         getFingerprintIdentify().resumeIdentify();
-        getFingerprintIdentify().startIdentify(MAX_AVAILABLE_TIMES, new FingerprintIdentifyListener() {
+        getFingerprintIdentify().startIdentify(MAX_AVAILABLE_TIMES, new IdentifyListener() {
             @Override
             public void onSucceed() {
                 promise.resolve(true);
